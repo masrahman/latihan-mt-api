@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity() {
         loadData()
     }
 
+//    override fun onResume() {
+//        super.onResume()
+//        loadData()
+//    }
+
     private fun loadData(){
         apiInterface.getProduct().enqueue(object: Callback<ProductResponse?> {
             override fun onResponse(
@@ -52,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<ProductResponse?>, t: Throwable) {
-                Toast.makeText(baseContext, t.message.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(baseContext, t.message.toString(), Toast.LENGTH_SHORT).show()
             }
         })
     }
