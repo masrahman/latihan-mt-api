@@ -1,13 +1,21 @@
 package id.maasrahman.mt_api
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import id.maasrahman.mt_api.databinding.ActivityMainBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -15,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ProductAdapter
     private var listData = mutableListOf<Product>()
     private var filterData = mutableListOf<Product>()
+
+    private lateinit var apiInterface: ApiInterface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,15 +34,27 @@ class MainActivity : AppCompatActivity() {
 
         title = "Result"
 
-        addDummy()
-
         initView()
+        apiInterface = ApiClient.getApiClient().create(ApiInterface::class.java)
+        loadData()
     }
 
-    private fun addDummy(){
-        listData.add(Product(title = "Product 1", description = "Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet", price = 45, thumbnail = "https://takeaseat.my/wp-content/uploads/2022/06/Z1180-Stripe-Light-Pink-School-Bag-3-400x400.jpg"))
-        listData.add(Product(title = "Product 2", description = "Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet", price = 45, thumbnail = "https://takeaseat.my/wp-content/uploads/2022/06/Z1180-Stripe-Light-Pink-School-Bag-3-400x400.jpg"))
-        listData.add(Product(title = "Product 3", description = "Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet", price = 45, thumbnail = "https://takeaseat.my/wp-content/uploads/2022/06/Z1180-Stripe-Light-Pink-School-Bag-3-400x400.jpg"))
+    private fun loadData(){
+        apiInterface.getProduct().enqueue(object: Callback<ProductResponse?> {
+            override fun onResponse(
+                call: Call<ProductResponse?>,
+                response: Response<ProductResponse?>
+            ) {
+                response.body()?.products?.let { rows ->
+                    listData = rows.toMutableList()
+                    adapter.updateData(listData)
+                }
+            }
+
+            override fun onFailure(call: Call<ProductResponse?>, t: Throwable) {
+                Toast.makeText(baseContext, t.message.toString(), Toast.LENGTH_SHORT).show();
+            }
+        })
     }
 
     private fun initView(){
@@ -65,10 +87,10 @@ class MainActivity : AppCompatActivity() {
         override fun afterTextChanged(s: Editable?) {
             filterData.clear()
             if(s?.isNotEmpty() == true){
-                val tmpData = listData.filter { e -> e.title?.lowercase()?.contains(s.toString().lowercase()) == true }
+                val tmpData = listData.filter { e -> e.title?.lowercase()?.contains(s.toString().lowercase()) == true } ?: emptyList()
                 filterData.addAll(tmpData)
             }else{
-                filterData.addAll(listData)
+                filterData.addAll(listData ?: emptyList())
             }
             adapter.updateData(filterData)
         }

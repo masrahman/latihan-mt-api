@@ -7,7 +7,7 @@ data class ProductResponse(
     @SerializedName("limit")
     var limit: Int? = null,
     @SerializedName("products")
-    var products: List<Product?>? = null,
+    var products: List<Product>? = null,
     @SerializedName("skip")
     var skip: Int? = null,
     @SerializedName("total")

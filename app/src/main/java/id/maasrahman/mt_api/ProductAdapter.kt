@@ -1,6 +1,7 @@
 package id.maasrahman.mt_api
 
 import android.view.LayoutInflater
+import android.view.RoundedCorner
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
@@ -39,7 +40,10 @@ class ProductAdapter(private val listener: (Product) -> Unit): RecyclerView.Adap
                 txtProductName.text = product.title
                 txtProductDesc.text = product.description
                 txtProductPrice.text = "$${product.price}"
-                Picasso.get().load(product.thumbnail).into(imgProduct)
+                Picasso.get().load(product.thumbnail)
+                    .fit()
+                    .centerCrop()
+                    .into(imgProduct)
                 cardItem.setOnClickListener {
                     listener(product)
                 }
